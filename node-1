@@ -1,0 +1,36 @@
+1.hadoop安装配置文件。
+hadoop有三种运行方式：
+1.单节点，单机伪分布式，集群。
+1.单节点：不用配置 安装hadoop即可，这种情况下hadoop被认为是一个进程。
+2.单机伪分布式：一个节点的集群配置方式。
+伪分布式需要配置：
+在安装目录下 的conf文件。
+1.Hadoop-env.sh
+export JAVA_HOME='JDKURL'
+2.core-site.xml 文件  这里是HDFS 的地址和端口号
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://localhost:9000</value>
+    </property>
+</configuration>
+3.这是hadoop种HDFS的配置 配置的备份方式默认为3，单机版需要改为1.
+<configuration>
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+</configuration>
+4.这是hadoop种的mapreduce的配置文件，配置的是JobTracker的地址和端口。
+<configuration>
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+</configuration>
+5.yarn是hadoop的新mapreduce框架 配置在yarn-site.xml
+<property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+</property>
+6.bin下启动和停止脚本 start-all.sh
