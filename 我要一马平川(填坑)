@@ -1,0 +1,33 @@
+1.第一个坑
+
+debian 安装java:
+先判断系统里有没有java
+java -version//此处注意系统默认
+正常思路：
+
+java 下载url：http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+
+点开 oracle java下载的列表 
+会有让你选择一个Agreement的checkbox 这个会有cookie的添加-操作(
+oraclelicense=accept-securebackup-cookie)
+根据cookie 会在html的java下载链接是否显示真实的url。
+
+wget 下载jdk 如果直接根据url 下载 网站会根据cookie判断 然后重定向到一个html页面。所以wget下载的都是html。。
+tar 解压问题 基本是 不能够format。
+
+解决方法：wget --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+
+附加知识：
+java -version //显示java版本
+
+whereis java //查找与java有关的路径
+
+~/.bashrc 修改环境变量。(各种export)
+
+2.第二个坑
+wget 下载一个任务  直接用ctrl+c 再次执行wget的时候 发现上次下载的任务还在。。
+所以
+pkill -9 wget //直接干掉。
+
+3.未完待续。。
+
