@@ -29,5 +29,31 @@ wget 下载一个任务  直接用ctrl+c 再次执行wget的时候 发现上次�
 所以
 pkill -9 wget //直接干掉。
 
-3.未完待续。。
+3.java版本更新。
+系统默认会安装openjdk 在/usr/lib/jvm
+查看当前系统 所有版本 
+update-alternatives --display java
+
+更新当前系统使用的java 
+命令：alternatives --install <链接> <名称> <路径> <优先度>
+update-alternatives  --install  /usr/bin/java java yoururl 300
+备注：通常系统默认装的openjdk的优先级是100  此处300 只需设置成display中比所有数字大即可。
+上述命令分别对应 java javah javac jar等。
+eg：
+sudo update-alternatives --install /usr/bin/java java /usr/java/jdk1.8.0_11/bin/java 300
+sudo update-alternatives --install /usr/bin/jar jar   /usr/java/jdk1.8.0_11/bin/jar 300
+sudo update-alternatives --install /usr/bin/javah javah /usr/java/jdk1.8.0_11/bin/javah 300
+sudo update-alternatives --install /usr/bin/javap javap /usr/java/jdk1.8.0_11/bin/javap 300
+
+补充知识：
+jps 查看java进程工具
+
+pwd 查看当前路径。
+
+hadoop Streaming 作业
+hadoop jar <jar> [mainClass] args...
+
+
+
+
 
