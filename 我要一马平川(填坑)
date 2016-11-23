@@ -53,6 +53,17 @@ pwd 查看当前路径。
 hadoop Streaming 作业
 hadoop jar <jar> [mainClass] args...
 
+4./etc/hosts 域名或者主机名
+局域网 ：ip machinename
+hadoop：默认是从hosts中读取对应的hostname 
+hdfs dfsadmin -report 读取不到节点(大部分是因为hosts文件配置问题)
+
+5.一共不到10个配置文件。。注意看报错信息 基本上xml配置中的错误 都能看出来。
+6.safe mode is on
+基本上是 正在执行过程中 ctrl+c了。。
+如果不是其他错误 safe mode 在5s后会自动关闭。
+强制关闭safe mode
+hdfs dfsadmin -safemode leave(版本比新的hadoop)
 
 
 
