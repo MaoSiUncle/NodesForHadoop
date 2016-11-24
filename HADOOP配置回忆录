@@ -1,0 +1,94 @@
+1.首先独立出来一个用户名为hadoop(随便你启什么名字都行)
+命令大概如下：
+useradd -m hadoop （-m 的作用是创建独立文件夹 自动创建 /home/hadoop）
+usermod -s  /bin/bash hadoop (指定默认登录的shell)
+passwd hadoop （给hadoop用户添加个密码）
+用户创建好了以后。
+还要添加的方便使用的 先提升用户权限 记住一个文件夹 /etc/sudoers
+先切到root
+然后编辑/etc/sudoers
+编辑前要 改变该文件的权限 chmod u+w /etc/sudoers
+你会发现里面有这么一行
+。。。。
+root ALL=(ALL:ALL) ALL
+。。。。
+在该行下 添加一行
+。。。。。。
+hadoop ALL=(ALL:ALL) ALL
+。。。。。
+保存完了 别忘了 chmod u-w /etc/sudoers
+
+至此独立用户算是okay了 接下来所有的下载和安装的文件夹都在/home/hadoop 下独立开来。
+针对当前hadoop用户 的环境变量等 还需要配置一下 .bashrc .ssh 等。。后面再说。
+上述步骤 为了所有机器统一。。每个机子都配一下。
+
+2.ssh配置问题。
+
+要保证主机和奴隶机通信（毕竟分布式）正常情况下 不需要双向通信 所以 只需要将主机可以登录奴隶机器即可。
+
+做这件事的前提：
+首先要改/etc/hosts （其他系统可能还要改更多）
+将ip与对应的主机/域名 对应好 
+主机和奴隶机的hosts一定要保持一致。
+测试ping通。
+（笔者实际搭建的时候，有的时候 hdfs dfsadmin -report
+显示不出来的情况 but jps主机和奴隶机显示的进程没毛病。
+大部分都是hosts的问题。）
+
+由于只需要主机到从机的单向通信。。所以 除了建立用户那个操作 ssh登录操作 大部分安装和配置都可以在主机上完成后 一路复制到奴隶机
+先配置ssh
+在主机上：
+ssh-keygen -t rsa #rsa算法生成公钥和密钥
+cat /home/hadoop/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+此处是设置本机登录。
+同样的情况。想要主机登录奴隶机 只需要将 id_rsa.pub 追加到奴隶机的authorized_keys就可以
+两个办法：（其实用户名可以省略）
+ 1.scp 文件 用户名@主机名：目标目录 #用工具直接copy过去 然后在目标机器上追加
+ 2.ssh-copy-id id_rsa.pub 用户名@目标主机 默认会追加到 ~/.ssh/authorized_keys
+
+执行后 测试ssh通过。
+
+
+
+3.安装必要软件
+大部分安装和配置只需要在主机上完成后 copy到奴隶机即可。
+首先是下载jdk(安装jdk)
+
+网上诸多网友推荐自己安装一套jdk，因为系统自带的jdk出现莫名的bug 仅仅为了避坑的原则 自己下载官网jdk。
+最新版本：时间：2016.11.23
+#java -version
+java version "1.8.0_111"
+Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)
+安装jdk的坑
+所有下载文件均在 hadoop 用户下 cd ~
+wget --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz
+至于为什么加header 参考我的另一篇 笔记。。
+
+下载完成后 解压
+wget http://apache.claz.org/hadoop/common/hadoop-2.6.0/hadoop-2.6.0.tar.gz 最新版本不是这个。
+下载完成后 解压
+
+接下来的问题是 配置环境变量(就需要配一下环境变量)
+网上大部分的 需要该hadoop-env.sh的配置命令
+正常该文件代码都会将JAVA_HOME=${JAVA_HOME}
+也就是说 环境变量配置正确会自动读取。
+
+大概配置如下：修改~/.bashrc文件
+export JAVA_HOME=/home/hadoop/jdk/ 
+export JRE_HOME=/home/hadoop/jdk/jre 
+export LASSPATH=.:$CLASSPATH:$JAVA_HOME/lib:$JRE_HOME/lib 
+export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin  
+export HADOOP_HOME=/home/hadoop/hadoop   
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+
+
+
+
+
