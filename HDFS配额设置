@@ -1,0 +1,31 @@
+1. Name Quotas
+
+       计算公式：QUOTA – (DIR_COUNT + FILE_COUNT) = REMAINING_QUOTA
+
+       这里的 10000 是指 DIR_COUNT + FILE_COUNT = 10000，最大值為 Long.Max_Value       
+
+       启用设定：hadoop dfsadmin -setQuota 10000 /user/seamon
+
+       清除設定： hadoop dfsadmin -clrQuota /user/seamon
+
+2. Space Quotas
+
+       计算公式：SPACE_QUOTA – CONTENT_SIZE = REMAINING_SPACE_QUOTA
+
+       可以使用 m, g, t 代表 MB, GB, TB
+
+       启用设定： hadoop dfsadmin -setSpaceQuota 1g /user/seamon/
+
+       清除設定： hadoop dfsadmin -clrSpaceQuota /user/seamon
+
+       这里需要特别注意的是“Space Quota”的设置所看的不是Hdfs的文件大小，而是写入Hdfs所有block块的大小，假设一个文件被切分为2个blocks，在core-site.xml里面设置 dfs.block.size=64MB，dfs.replication=3，那么该文件所需要的存储空间为：2 * 64M * 3 =  384MB
+
+       如果一个小文件（例如，1k大小的文件）被上传到hdfs，该文件并不能占满一整个blok，但是按照hdfs配置规则也需要按照一个blok计算，即存储空间为：1 x 64MB x 3 = 192MB
+
+3. 其它事项
+
+       hdfs的配额管理是跟着目录走，如果目录被重命名，配额依然有效。
+
+       麻烦的是，在设置完配额以后，如果超过限制，虽然文件不会写入到hdfs，但是文件名依然会存在，只是文件size为0。当加大配额设置后，还需要将之前的空文件删除才能进一步写入。
+
+       如果新设置的quota值，小于该目录现有的Name Quotas 及 Space Quotas，系统并不会给出错误提示，但是该目录的配置会变成最新设置的quota
