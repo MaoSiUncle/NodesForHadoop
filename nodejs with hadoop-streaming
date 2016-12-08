@@ -1,0 +1,82 @@
+说在前面：理论上 用hadoop-streaming-*.jar 工具的话 你可以利用手头能执行的大部分脚本语言进行编程。
+
+下面主要记录一下关于nodejs 编写 hadoop stream的编程方式。
+首先要声明脚本类型 这个你在很多不同种语言里应该见过 这里用node 所以指定node环境
+
+#!/usr/local/bin/node
+如果你找不到node在哪里
+
+命令：which node
+接下来介绍标准代码 nodejs
+...mapper.js
+var stdin=process.openStdin(); //获取标准输入流
+var input='';//由于流文件读入问题会部分进行读入 一行数据通常以回车结尾 因此检测到回车才算流数据中buffer全部输出。
+stdin.setEncoding('utf8');//设置编码格式 hadoop默认的编码格式你懂的
+stdin.on('data',function (data) {
+    //读取流的buffer
+    if(data){//如果有数据了 拼接到input
+        input+=data;
+        while(input.match(/\r?\n/)){//如果检测到input中存在\r\n 或者\n  此处正则中的问号 做有无量词：表示前面的出现1次或者0次。
+            input=RegExp.rightContext;//这个根据目前的mdn中 rightContext和leftContext 还是非标准属性 获取满足正则的右侧左侧表达式。
+            proc(RegExp.leftContext);//处理右侧表达式
+        }
+    }
+});
+stdin.on('end',function () {//处理结束事件。
+   if(input){
+       proc(input);
+   }
+});
+
+function proc(line){
+    var all=line.split(' ');
+    var key=all[0];
+    console.log(key+"\t"+1);
+}
+。。。reducer.js  讲解同上
+var stdin=process.openStdin();
+var input='';
+var counter={};
+stdin.setEncoding('utf8');
+stdin.on('data',function (data) {
+    if(data){
+        input+=data;
+        while(input.match(/\r?\n/)){
+            input=RegExp.rightContext;
+            proc(RegExp.leftContext);
+        }
+    }
+});
+stdin.on('end',function () {
+    if(input){
+        proc(input);
+    }
+    for(var key in counter){
+        console.log(key+":"+counter[k])
+    }
+});
+
+function proc(line){
+    var all=line.split('\t');
+    var key=all[0];
+    if(counter[key]){
+        counter[key]++;
+    }else{
+        counter[key]=1;
+    }
+}
+命令：hadoop jar /home/hadoop/hadoop/share/hadoop/tools/lib/hadoop-streaming-2.6.0.jar -files ./mapper2.js,./reducer2.js -mapper ./mapper2.js -reducer ./reducer2.js -input /test/access.log.10 -output /h1234 
+执行过程主要hadoop-streaming 参数
+
+-file 将本地的mapper.js文件和reducer.js文件上传到HDFS中。
+-input HDFS中需要处理的输入文件
+-output HDFS中输出文件
+-mapper 指定mapper文件
+-reducer 指定reducer文件
+
+名词：passwd-less ssh 无密码登录
+
+hadoop-streaming 的mapperreduce 并不需要每次 都跑一次hadoop集群 来进行测试你代码正确与否
+实际上 可直接通过命令行进行简单测试
+cat yourdatafile|mapper.js|sort|reducer.js 这种方式进行（sort命令模拟map过程后的 分区 按照键值进行排序）
+未完待续......
