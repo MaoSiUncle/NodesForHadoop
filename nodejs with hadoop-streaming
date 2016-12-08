@@ -79,4 +79,6 @@ function proc(line){
 hadoop-streaming 的mapperreduce 并不需要每次 都跑一次hadoop集群 来进行测试你代码正确与否
 实际上 可直接通过命令行进行简单测试
 cat yourdatafile|mapper.js|sort|reducer.js 这种方式进行（sort命令模拟map过程后的 分区 按照键值进行排序）
+备注：每次执行 输出文件的文件夹必须是个新的
+
 未完待续......
