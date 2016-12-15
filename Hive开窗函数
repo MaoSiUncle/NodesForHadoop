@@ -9,3 +9,10 @@ DENSE_RANK()
 ROW_NUMBER()
 
 1 2 3 4 5 6 7
+
+FIRST_VALUE 当前分组内排序后第一行的数据
+LAST_VALUE 当前分组内排序后的末行的数据（截止到当前行）--所以如果是说 想要获取分组内末尾行的数据 可以用FIRST_VALUE变通一下。
+
+LAG向前第n行的值
+LEAD向后第n行的值
+
